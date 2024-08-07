@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag and Drop Team Reorder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #teamList {
+            list-style-type: none;
+            padding: 0;
+            width: 350px;
+        }
+        #teamList li {
+            padding: 8px;
+            margin-bottom: 5px;
+            border: 1px solid #ddd;
+            background: #f9f9f9;
+            cursor: move;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+        #teamList li.dragging {
+            opacity: 0.5;
+        }
+        .position {
+            width: 40px;
+            text-align: center;
+            margin-right: 10px;
+        }
+        .team-name {
+            flex-grow: 1;
+        }
+        .buttons {
+            margin-bottom: 20px;
+        }
+        .download-button {
+            font-size: 16px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
+        }
+        .download-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="buttons">
+        <button class="download-button" onclick="downloadTxtFile()">Download List as TXT</button>
+    </div>
+    <h1>Drag and Drop Team Reorder</h1>
+    <ul id="teamList">
+        <!-- List items will be populated here -->
+    </ul>
+
+    <script>
+        const teams = [
+            "Arsenal", "Aston Villa", "Chelsea", "Everton", "Liverpool",
+            "Manchester City", "Manchester Utd", "Newcastle", "Southampton",
+            "Tottenham", "West Ham", "Crystal Palace", "Fulham", "Ipswich Town",
+            "Leicester City", "Nottingham", "Wolves", "Brighton", "Bournemouth",
+            "Brentford"
+        ];
+
+        const teamList = document.getElementById('teamList');
+
+        function populateList() {
+            teamList.innerHTML = '';
+            teams.forEach((team, index) => {
+                const li = document.createElement('li');
+                li.draggable = true;
+                li.dataset.index = index;
+
+                const position = document.createElement('span');
+                position.className = 'position';
+                position.textContent = index + 1;
+
+                const teamName = document.createElement('span');
+                teamName.className = 'team-name';
+                teamName.textContent = team;
+
+                li.appendChild(position);
+                li.appendChild(teamName);
+
+                li.addEventListener('dragstart', handleDragStart);
+                li.addEventListener('dragover', handleDragOver);
+                li.addEventListener('drop', handleDrop);
+                li.addEventListener('dragend', handleDragEnd);
+
+                teamList.appendChild(li);
+            });
+        }
+
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.index);
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const draggedIndex = e.dataTransfer.getData('text/plain');
+            const targetIndex = e.target.closest('li').dataset.index;
+
+            if (draggedIndex !== targetIndex) {
+                const draggedItem = teams.splice(draggedIndex, 1)[0];
+                teams.splice(targetIndex, 0, draggedItem);
+                populateList();
+            }
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function downloadTxtFile() {
+            const blob = new Blob([teams.join('\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'teams.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize the list
+        populateList();
+    </script>
+</body>
+</html>
