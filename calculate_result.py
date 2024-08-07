@@ -15,11 +15,14 @@ def calculate(prediction: list[str], final: list[str]) -> int:
         for index, team in enumerate(prediction)
     )
 
-    champion_bonus = 10 if prediction[0] == final[0] else 0
-    relegation_bonus = 5 * len(set(prediction[-3:]).intersection(final[-3:]))
-    top4_bonus = 5 * len(set(prediction[:4]).intersection(final[:4]))
+    bonuses: dict[str, int] = dict(
+        champion=10 if prediction[0] == final[0] else 0,
+        relagtion=5 * len(set(prediction[-3:]).intersection(final[-3:])),
+        top4=5 * len(set(prediction[:4]).intersection(final[:4])),
+        top6=3 * len(set(prediction[:6]).intersection(final[4:6]))
+    )
 
-    return position_diffs - champion_bonus - relegation_bonus - top4_bonus
+    return position_diffs - sum(bonuses.values())
 
 
 def main() -> None:
