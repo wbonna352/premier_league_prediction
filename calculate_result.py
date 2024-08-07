@@ -8,7 +8,7 @@ def read_file(file: Path) -> list[str]:
 
 def calculate(prediction: list[str], final: list[str]) -> int:
 
-    assert set(prediction) == set(final)
+    assert set(prediction) == set(final), "prediction and final must contain the same set of teams"
 
     position_diffs = sum(
         abs(index - final.index(team))
@@ -26,13 +26,16 @@ def main() -> None:
 
     final_table = read_file(Path("final_table.txt"))
 
+    prediction_files = Path("predictions").glob("*.txt")
+
     predictions: dict[str, list[str]] = {
         file.stem: read_file(file)
-        for file in Path("predictions").glob("*.txt")
+        for file in prediction_files
     }
 
-    for user in predictions:
-        print(f"{user}: {calculate(predictions.get(user), final_table)}")
+    for user, prediction in predictions.items():
+        score = calculate(prediction, final_table)
+        print(f"{user}: {score}")
 
 
 if __name__ == "__main__":
